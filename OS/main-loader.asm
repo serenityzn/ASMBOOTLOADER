@@ -1,38 +1,19 @@
 [org 	0x1000]
 [bits 	16]
 
-DATA_OFFSET equ 0x2000
 
-	mov 	ah, 0x0E  ; номер функции BIOS
-	mov 	al, '['
-	int 	0x10
 	mov 	si, str1
 	call	print_text
-	mov 	al, ']'
-	int 	0x10
 	
 	mov 	dl, 0x01 ; read Drive B	
-;	mov 	ch, 0x00 ; cylinder number cyl, head [0,0, 1-18] Sector 0 -18. [0, 1, 1-18] sector 19-36. [1, 0 , 1-18] Sectors 37-54 [1,1 , 1-18] Sectors 55-72
-;	mov 	dh, 0x00 ; head number
-;	mov 	cl, 0x01 ; sector number
-;	call 	fsload ;set cyl=0 head=0 sec=3
-	reading:
-;		call 	read_disk
-;		mov 	si, 0x2000
-;		call 	print_text
-	mov 	si, fstable
-	push 	si
+	mov 	di, 0x0
 	keyboard:
 		call 	read_command
 		mov 	si, command
 		call 	print_text
-
-		pop 	si ; ->fstable
-		call    fsload
+		call    fs_table_load
 		call 	read_disk
-		inc 	si
-		inc 	si
-		push 	si
+		add 	di, 0x02
 		mov 	si, 0x2000
 		call 	print_text
 		mov 	si, 0x2200
@@ -41,74 +22,10 @@ DATA_OFFSET equ 0x2000
 	end_keyboard:
 	jmp $
 
-fsload:
-	push 	ax
-;	mov 	si, fstable
-	mov 	ax, [ds:si] ; 0003
-	mov 	ch, ah ; cylinder ch=00
-	cmp	al, 0x13 
-	jle	head0
-	sub	al, 0x20
-	mov 	dh, 0x01 ; head
-	mov	cl, al ; sector
-	jmp 	head1
-	head0:
-		mov 	dh, 0x00 ; head dh=00
-		mov 	cl, al ; sector cl=03
-	head1:
-		pop 	ax
-	ret
 
-
-print_text:
-	push 	ax
-	print_loop:
-		mov 	al, [ds:si]
-		int	10h
-		inc 	si
-		test 	al, al
-		jz 	exit_loop
-		jmp 	print_loop
-	exit_loop:
-	pop 	ax
-	ret
-
-read_command:
-;	mov 	si, command
-	cmd:
-		call 	read_key
-		mov 	al, bl
-		int 	10h
-		cmp 	bl, 't'
-		je 	cmd_exit
-;		mov 	[ds:si], bx
-;		inc 	si
-		jmp 	cmd
-	cmd_exit:
-		;mov 	[ds:si+di], 0x0
-	ret
-
-read_key:
-	push 	ax
-	mov 	ah, 0x00
-	int 	0x16
-	mov 	bx, ax
-	pop 	ax
-	ret
-
-read_disk:
-	push 	ax
-;	mov 	dl, 0x01 ; 00 - disk A - FDD  01 - disk B FDD
-	mov 	ax, cs
-	mov 	es, ax
-	mov 	bx, DATA_OFFSET
-
-	mov 	ah, 0x02
-	mov 	al, 0x02
-
-	int 	13h
-	pop 	ax
-	ret
+%include "filesystem.asm"
+%include "console.asm"
+%include "io-devices.asm"
 
 section .data
 	str1 		db 	'Main program started. To continue please press any key', 0

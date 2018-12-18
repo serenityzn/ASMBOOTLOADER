@@ -1,76 +1,18 @@
-[org 	0x1000]
-[bits 	16]
-
-mov 	cx, fstable
-mov 	ax, [cx]
-mov 	ch, ah ; cylinder
-cmp	al, 0x13
-jle	head0
-sub	al, 0x20
-mov 	dh, 0x01
-jmp 	head1
-head0:
-	mov 	dh, 0x00
-	mov 	cl, al
-head1:
-
-
-
-.data
-fstable:
-     dw 0x0001  
-     dw 0x0003  
-     dw 0x0005  
-     dw 0x0007  
-     dw 0x0009  
-     dw 0x000B  
-     dw 0x000D  
-     dw 0x000F  
-     dw 0x0011  
-     dw 0x0021  
-     dw 0x0023  
-     dw 0x0025  
-     dw 0x0027  
-     dw 0x0029  
-     dw 0x002B  
-     dw 0x002D  
-     dw 0x002F  
-     dw 0x0031  
-     dw 0x0101  
-     dw 0x0103  
-     dw 0x0105  
-     dw 0x0107  
-     dw 0x0109  
-     dw 0x010B  
-     dw 0x010D  
-     dw 0x010F  
-     dw 0x0111  
-     dw 0x0121  
-     dw 0x0123  
-     dw 0x0125  
-     dw 0x0127  
-     dw 0x0129  
-     dw 0x012B  
-     dw 0x012D  
-     dw 0x012F  
-     dw 0x0131  
-     dw 0x0201  
-     dw 0x0203  
-     dw 0x0205  
-     dw 0x0207  
-     dw 0x0209  
-     dw 0x020B  
-     dw 0x020D  
-     dw 0x020F  
-     dw 0x0211  
-     dw 0x0221  
-     dw 0x0223  
-     dw 0x0225  
-     dw 0x0227  
-     dw 0x0229  
-     dw 0x022B  
-     dw 0x022D  
-     dw 0x022F  
-     dw 0x0231  
-     dw 0x0301  
-     dw 0x0303
+fs_table_load: ; in si should have pointer to fstable. Returns cl, ch, dh with info about cylinder, head and sector
+	push 	ax
+	mov 	si, fstable
+	add 	si, di
+	mov 	ax, [ds:si] ; 0003
+	mov 	ch, ah ; cylinder ch=00
+	cmp	al, 0x13 
+	jle	head0
+	sub	al, 0x20
+	mov 	dh, 0x01 ; head
+	mov	cl, al ; sector
+	jmp 	head1
+	head0:
+		mov 	dh, 0x00 ; head dh=00
+		mov 	cl, al ; sector cl=03
+	head1:
+		pop 	ax
+	ret
