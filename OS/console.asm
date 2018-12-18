@@ -14,8 +14,8 @@ print_text:
 read_command:
 	cmd:
 		call 	read_key
-		mov 	al, bl
-		int 	10h
+;		mov 	al, bl
+;		int 	10h
 		cmp 	bl, 't'
 		je 	cmd_exit
 		jmp 	cmd

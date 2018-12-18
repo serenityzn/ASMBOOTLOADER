@@ -30,7 +30,7 @@
 section .data
 	str1 		db 	'Main program started. To continue please press any key', 0
 	str2 		db 	'Key Pressed', 0
-	command 	db 	'ls',0
+	command 	db 	'/> ',0
 fstable:
      			dw 0x0001  
      			dw 0x0003  
